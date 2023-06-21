@@ -78,6 +78,7 @@ router.post(`/`, uploadOptions.single('img'), async (req, res) =>{
         name: imgName,
         ext: imgExt,
         isActive: true,
+        product:req.body.product,
         src: `${basePath}${imgName}`,// "http://localhost:3000/public/upload/image-2323232"
         
     })

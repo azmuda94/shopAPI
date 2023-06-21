@@ -55,6 +55,7 @@ app.post(`${api_url}/`, async function (req, res) {
   
 })
 
-app.listen(5001,()=>{
+
+app.listen(process.env.PORT,()=>{
     console.log('Server started.')
 });
