@@ -26,11 +26,14 @@ const usersRoutes = require('./routes/users');
 const filesRoutes = require('./routes/files');
 const typeProductsRoutes = require('./routes/typeProducts');
 const productsRoutes = require('./routes/products');
+//const testRoutes = require('./routes/test');
+
 
 app.use(`${api_url}/users`, usersRoutes);
 app.use(`${api_url}/files`, filesRoutes);
 app.use(`${api_url}/typeproducts`, typeProductsRoutes);
 app.use(`${api_url}/products`, productsRoutes);
+//app.use(`${api_url}/test`, testRoutes);
 
 mongoose.connect(process.env.CONNECTION_DB)
 .then(()=>{
