@@ -2,9 +2,37 @@ const {Product} = require('../models/product');
 const {TypeProduct,typeProduct} = require('../models/typeProduct');
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
+
+router.get(`/typeproduct`, async (req, res) =>{
+    let typeUrl=req.query.url;
+    let typeId=req.query.id;
+    let typeproduct
+
+    let productList;
+    let query;
+
+    if(typeof typeId === "undefined")
+    {
+        query = {url:typeUrl};
+        typeproduct=await TypeProduct.findOne((query));
+        typeId=typeproduct
+    }
+
+    query = {typeProduct:typeId};
+
+    productList = await Product.find((query)).populate('typeProduct');
+
+    if(!productList) {
+        res.status(500).json({success: false})
+    } 
+    res.status(200).send(productList);
+
+})
+
 
 router.get(`/`, async (req, res) =>{
-    const productList = await Product.find().populate('');
+    const productList = await Product.find().populate('typeProduct');
 
     if(!productList) {
         res.status(500).json({success: false})
@@ -13,7 +41,7 @@ router.get(`/`, async (req, res) =>{
 })
 
 router.get('/:id', async(req,res)=>{
-    const product = await Product.findById(req.params.id).populate('');
+    const product = await Product.findById(req.params.id).populate('typeProduct');
 
     if(!product) {
         res.status(500).json({message: 'The type product with the given ID was not found.'})
@@ -21,19 +49,6 @@ router.get('/:id', async(req,res)=>{
     res.status(200).send(product);
 })
 
-router.get(`/typeproduct/:id`, async (req, res) =>{
-
-    var ObjectId = mongoose.Types.ObjectId; 
- 
-    var query = { TypeProduct: new ObjectId(req.params.id.toString()) };
-
-    const productList = await Product.find((query)).populate('');
-
-    if(!productList) {
-        res.status(500).json({success: false})
-    } 
-    res.send(productList);
-})
 
 router.post('/', async (req,res)=>{
     const typeProduct = await TypeProduct.findById(req.body.typeProduct);

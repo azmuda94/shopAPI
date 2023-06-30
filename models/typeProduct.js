@@ -17,6 +17,11 @@ const typeProduct=mongoose.Schema({
         type: Boolean,
         required: true
     },
+    parent: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'TypeProduct',
+        default: null
+    },
 });
 
 typeProduct.virtual('id').get(function () {

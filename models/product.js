@@ -19,6 +19,10 @@ const product=mongoose.Schema({
         ref: 'User',
         required:false
     },
+    src:  {
+        type: String,
+        required:false
+    },
     mainFile:  {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'File',

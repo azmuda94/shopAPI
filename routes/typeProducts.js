@@ -21,14 +21,16 @@ router.get('/:id', async(req,res)=>{
 })
 
 router.post('/', async (req,res)=>{
+
     let typeProduct = new TypeProduct({
         name: req.body.name,
         url: req.body.url,
+        parent: req.body.parent,
         description: req.body.description,
-        isActive: true
+        isActive: req.body.isActive
     })
     typeProduct = await typeProduct.save();
-
+    
     if(!typeProduct)
         return res.status(400).send('the category cannot be created!')
 
