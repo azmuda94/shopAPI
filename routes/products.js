@@ -1,5 +1,7 @@
 const {Product} = require('../models/product');
 const {TypeProduct,typeProduct} = require('../models/typeProduct');
+const {File} = require('../models/file');
+
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
@@ -21,7 +23,7 @@ router.get(`/typeproduct`, async (req, res) =>{
 
     query = {typeProduct:typeId};
 
-    productList = await Product.find((query)).populate('typeProduct');
+    productList = await Product.find((query)).populate('typeProduct mainFile');
 
     if(!productList) {
         res.status(500).json({success: false})
@@ -32,7 +34,7 @@ router.get(`/typeproduct`, async (req, res) =>{
 
 
 router.get(`/`, async (req, res) =>{
-    const productList = await Product.find().populate('typeProduct');
+    const productList = await Product.find().populate('typeProduct mainFile');
 
     if(!productList) {
         res.status(500).json({success: false})
@@ -41,12 +43,24 @@ router.get(`/`, async (req, res) =>{
 })
 
 router.get('/:id', async(req,res)=>{
-    const product = await Product.findById(req.params.id).populate('typeProduct');
+    
+    const product = await Product.findById(req.params.id).populate('typeProduct mainFile');
 
     if(!product) {
         res.status(500).json({message: 'The type product with the given ID was not found.'})
     } 
-    res.status(200).send(product);
+
+    var query = { product: req.params.id};
+
+    const fileList = await File.find((query));
+
+    if(!fileList) {
+        res.status(500).json({success: false})
+    } 
+
+    const productFinal ={product:product,files:fileList};
+
+    res.status(200).send(productFinal);
 })
 
 

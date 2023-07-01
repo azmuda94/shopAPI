@@ -1,9 +1,9 @@
 const express = require('express');
 const {File} = require('../models/file');
+const {Product} = require('../models/product');
 const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
-
 const {Storage} = require('@google-cloud/storage');
 const storages = new Storage();
 
@@ -31,21 +31,18 @@ const bucket = storagest.bucket(process.env.BUCKET_NAME); // Get this from Googl
 
 router.post("/upload", multerst.single("img"), async (req, res) => {
     const img = req.file;
-
+    
     try {
-        if (img) {
-         
+        if (img) {         
           const fileName = img.originalname.split(' ').join('-');
           const extension = FILE_TYPE_MAP[img.mimetype];
           const fileNameNow=`${fileName}-${Date.now()}.${extension}`;
 
           const blob = bucket.file(fileNameNow);
-          const blobStream = blob.createWriteStream();
+          const blobStream = blob.createWriteStream();          
     
           blobStream.on("finish", async (item) => {
-           /// res.status(200).send("Success");
-            
-            
+
             if(!img) return res.status(400).send('No image in the request')
 
             const basePath = `${process.env.DISK_STORAGE_URL}/${process.env.BUCKET_NAME}/`;
@@ -62,7 +59,15 @@ router.post("/upload", multerst.single("img"), async (req, res) => {
             file = await file.save();
         
             if(!file) 
-            return res.status(500).send('The file cannot be created')
+              return res.status(500).send('The file cannot be created');
+
+           if (req.body.product && req.body.isMainFile)
+            {             
+              const product= await Product.findOneAndUpdate({_id:req.body.product},{mainFile:file.id});
+              
+              if(!product) 
+                return res.status(500).send('The product cannot be updated');
+            }            
         
             res.send(file);
             
@@ -99,7 +104,7 @@ const storage = multer.diskStorage({
 const uploadOptions = multer({ storage: storage })
 
 router.get(`/`, async (req, res) =>{
-    const fileList = await File.find();
+    const fileList = await File.find().populate('product');
 
     if(!fileList) {
         res.status(500).json({success: false})
@@ -122,6 +127,18 @@ router.get(`/product/:id`, async (req, res) =>{
     res.send(fileList);
 })
 
+
+router.get(`/forproject`, async (req, res) =>{
+
+  var query = { product: null};
+
+  const fileList = await File.find((query));
+
+  if(!fileList) {
+      res.status(500).json({success: false})
+  } 
+  res.send(fileList);
+})
 
 router.get(`/:id`, async (req, res) =>{
     const file = await File.findById(req.params.id);
