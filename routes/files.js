@@ -107,7 +107,7 @@ router.get(`/`, async (req, res) =>{
     const fileList = await File.find().populate('product');
 
     if(!fileList) {
-        res.status(500).json({success: false})
+       return res.status(500).json({success: false})
     } 
     res.send(fileList);
 })
@@ -135,7 +135,7 @@ router.get(`/forproject`, async (req, res) =>{
   const fileList = await File.find((query));
 
   if(!fileList) {
-      res.status(500).json({success: false})
+    return  res.status(500).json({success: false})
   } 
   res.send(fileList);
 })
@@ -143,13 +143,13 @@ router.get(`/forproject`, async (req, res) =>{
 router.get(`/:id`, async (req, res) =>{
 
   if (typeof req.params.id!='number'){
-    res.status(500).json({success: false})
+   return res.status(500).json({success: false})
   }
 
     const file = await File.findById(req.params.id);
 
     if(!file) {
-        res.status(500).json({success: false})
+       return res.status(500).json({success: false})
     } 
     res.send(file);
 })
