@@ -16,6 +16,7 @@ router.get(`/typeproduct`, async (req, res) =>{
 
     if(typeof typeId === "undefined")
     {
+       
         query = {url:typeUrl};
         typeproduct=await TypeProduct.findOne((query));
         typeId=typeproduct

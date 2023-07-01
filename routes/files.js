@@ -141,6 +141,11 @@ router.get(`/forproject`, async (req, res) =>{
 })
 
 router.get(`/:id`, async (req, res) =>{
+
+  if (typeof req.params.id!='number'){
+    res.status(500).json({success: false})
+  }
+
     const file = await File.findById(req.params.id);
 
     if(!file) {
