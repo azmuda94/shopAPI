@@ -44,6 +44,10 @@ router.get(`/`, async (req, res) =>{
 })
 
 router.get('/:id', async(req,res)=>{
+
+    if (typeof req.params.id!='number'){
+        return res.status(500).json({success: false})
+    }
     
     const product = await Product.findById(req.params.id).populate('typeProduct mainFile');
 

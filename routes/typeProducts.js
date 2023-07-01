@@ -12,6 +12,11 @@ router.get(`/`, async (req, res) =>{
 })
 
 router.get('/:id', async(req,res)=>{
+    
+    if (typeof req.params.id!='number'){
+        return res.status(500).json({success: false})
+    }
+
     const typeProduct = await TypeProduct.findById(req.params.id);
 
     if(!typeProduct) {
