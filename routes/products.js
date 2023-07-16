@@ -30,7 +30,7 @@ router.get(`/typeproduct`, async (req, res) =>{
         res.status(500).json({success: false})
     } 
 
-    typeProduct = {};
+    const typeProduct = {};
     
     const final ={typeProduct:typeProduct,products:productList};
     
