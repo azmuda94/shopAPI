@@ -30,13 +30,8 @@ router.get(`/typeproduct`, async (req, res) =>{
         res.status(500).json({success: false})
     } 
 
-    typeProduct = await TypeProduct.findById(typeId);
-
-    if(!typeProduct) {
-        res.status(500).json({success: false})
-    } 
-
-
+    typeProduct = {};
+    
     const final ={typeProduct:typeProduct,products:productList};
     
     res.status(200).send(final);
