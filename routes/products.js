@@ -24,12 +24,22 @@ router.get(`/typeproduct`, async (req, res) =>{
 
     query = {typeProduct:typeId};
 
-    productList = await Product.find((query)).populate('typeProduct mainFile');
+    productList = await Product.find((query)).populate('typeProduct mainFile');    
 
     if(!productList) {
         res.status(500).json({success: false})
     } 
-    res.status(200).send(productList);
+
+    typeProduct = await TypeProduct.findById(typeId);
+
+    if(!typeProduct) {
+        res.status(500).json({success: false})
+    } 
+
+
+    const final ={typeProduct:typeProduct,products:productList};
+    
+    res.status(200).send(final);
 
 })
 
