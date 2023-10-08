@@ -37,6 +37,25 @@ router.get('/:id', async(req,res)=>{
 })
 
 router.post('/register', async (req,res)=>{
+
+    if (!req.body.password)
+    {
+        return res.status(400).send('Należy podać hasło!')
+
+    }
+
+    if (!req.body.name)
+    {
+        return res.status(400).send('Należy podać login!')
+
+    }
+
+    if (!req.body.email)
+    {
+        return res.status(400).send('Należy podać e-mail!')
+
+    }
+
     let user = new User({
         name: req.body.name,
         email: req.body.email,

@@ -14,9 +14,9 @@ const user=mongoose.Schema({
         required: true
     },
     isAdmin: {
-        type: Boolean,
-        required: true
+        type: Boolean
     },
+    
    
 });
 
