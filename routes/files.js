@@ -7,12 +7,15 @@ const multer = require('multer');
 const {Storage} = require('@google-cloud/storage');
 const storages = new Storage();
 
+var MulterAzureStorage = require('multer-azure-storage')
+
 
 const FILE_TYPE_MAP = {
     'image/png': 'png',
     'image/jpeg': 'jpeg',
-    'image/jpg': 'jpg'
+    'image/jpg': 'jpg',
 }
+
 
 const multerst = multer({
     storage: multer.memoryStorage(),
@@ -29,9 +32,81 @@ const storagest = new Storage({
 });
 const bucket = storagest.bucket(process.env.BUCKET_NAME); // Get this from Google Cloud -> Storage
 
+////////////////// AZURE ////////////
+
+
+
+const account = process.env.AZURE_ACCOUNT;
+const accountKey =process.env.AZURE_ACCOUNT_KEY;
+var containerName = process.env.AZURE_ACCOUNT_CONTAINER;
+
+var multerAzure = multer({
+  storage: new MulterAzureStorage({
+    azureStorageConnectionString: accountKey,
+    containerName: containerName,
+    containerSecurity: 'blob',
+  })
+})
+
+
+
+router.post("/uploadAzure", multerAzure.single("img"), async (req, res) => {
+  const img = req.file;
+
+
+  try {
+      if (img) {         
+        const fileName = img.originalname.split(' ').join('-');
+        const extension = FILE_TYPE_MAP[img.mimetype];
+        const fileNameNow=`${fileName}-${Date.now()}.${extension}`;
+
+        const blob = bucket.file(fileNameNow);
+        const blobStream = blob.createWriteStream();     
+
+        blobStream.on("finish", async (item) => {
+
+          if(!img) return res.status(400).send('No image in the request')
+
+          const basePath = img.url;
+      
+          let file = new File({
+              name: fileNameNow,
+              ext: extension,
+              isActive: true,
+              product:req.body.product,
+              src: `${basePath}`,// "http://localhost:3000/public/upload/image-2323232"
+              
+          })
+      
+          file = await file.save();
+      
+          if(!file) 
+            return res.status(500).send('The file cannot be created');
+
+          if (req.body.product && req.body.isMainFile)
+          {             
+            const product= await Product.findOneAndUpdate({_id:req.body.product},{mainFile:file.id});
+            
+            if(!product) 
+              return res.status(500).send('The product cannot be updated');
+          }            
+      
+          res.send(file);
+          
+        });
+        blobStream.end(req.file.buffer);
+        
+      } else throw "error with img";
+    } catch (error) {
+      res.status(500).send(error);
+    }
+
+});
+
 router.post("/upload", multerst.single("img"), async (req, res) => {
     const img = req.file;
-    
+
+
     try {
         if (img) {         
           const fileName = img.originalname.split(' ').join('-');
@@ -39,7 +114,8 @@ router.post("/upload", multerst.single("img"), async (req, res) => {
           const fileNameNow=`${fileName}-${Date.now()}.${extension}`;
 
           const blob = bucket.file(fileNameNow);
-          const blobStream = blob.createWriteStream();          
+          const blobStream = blob.createWriteStream();              
+         
     
           blobStream.on("finish", async (item) => {
 
@@ -83,25 +159,6 @@ router.post("/upload", multerst.single("img"), async (req, res) => {
 
 
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const isValid = FILE_TYPE_MAP[file.mimetype];
-        let uploadError = new Error('invalid image type');
-
-        if(isValid) {
-            uploadError = null
-        }
-      cb(uploadError, 'public/uploads')
-    },
-    filename: function (req, file, cb) {
-        
-      const fileName = file.originalname.split(' ').join('-');
-      const extension = FILE_TYPE_MAP[file.mimetype];
-      cb(null, `${fileName}-${Date.now()}.${extension}`)
-    }
-  })
-  
-const uploadOptions = multer({ storage: storage })
 
 router.get(`/`, async (req, res) =>{
     const fileList = await File.find().populate('product');
@@ -154,32 +211,6 @@ router.get(`/:id`, async (req, res) =>{
     res.send(file);
 })
 
-
-router.post(`/`, uploadOptions.single('img'), async (req, res) =>{
-   
-    const img = req.file;
-    if(!img) return res.status(400).send('No image in the request')
-
-    const imgName = img.filename
-    const imgExt=img.mimetype
-    const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
-
-    let file = new File({
-        name: imgName,
-        ext: imgExt,
-        isActive: true,
-        product:req.body.product,
-        src: `${basePath}${imgName}`,// "http://localhost:3000/public/upload/image-2323232"
-        
-    })
-
-    file = await file.save();
-
-    if(!file) 
-    return res.status(500).send('The file cannot be created')
-
-    res.send(file);
-})
 
 router.delete('/:id', (req, res)=>{
     File.findByIdAndRemove(req.params.id).then(file =>{
