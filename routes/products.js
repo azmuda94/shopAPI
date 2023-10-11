@@ -94,7 +94,7 @@ router.post('/', async (req,res)=>{
 })
 
 router.delete('/:id', (req, res)=>{
-    TypeProduct.findByIdAndRemove(req.params.id).then(typeProduct =>{
+    Product.findByIdAndRemove(req.params.id).then(typeProduct =>{
         if(typeProduct) {
             return res.status(200).json({success: true, message: 'the product type is deleted!'})
         } else {
