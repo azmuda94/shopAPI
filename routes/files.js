@@ -52,8 +52,6 @@ var multerAzure = multer({
 
 router.post("/uploadAzure", multerAzure.single("img"), async (req, res) => {
   const img = req.file;
-
-
   try {
       if (img) {         
         const fileName = img.originalname.split(' ').join('-');

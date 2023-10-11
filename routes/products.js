@@ -94,11 +94,35 @@ router.post('/', async (req,res)=>{
 })
 
 router.delete('/:id', (req, res)=>{
-    TypeProduct.findByIdAndRemove(req.params.id).then(typeProduct =>{
-        if(typeProduct) {
+    Product.findByIdAndRemove(req.params.id).then(product =>{
+        console.log(req.params.id);
+        if(product) {
             return res.status(200).json({success: true, message: 'the product type is deleted!'})
         } else {
             return res.status(404).json({success: false , message: "product type not found!"})
+        }
+    }).catch(err=>{
+       return res.status(500).json({success: false, error: err}) 
+    })
+})
+
+router.put('/:id', (req, res)=>{
+
+    const updatedObject={
+        name: req.body.name,
+        size: req.body.size,
+        description: req.body.description,
+        user: req.body.user,
+        typeProduct: req.body.typeProduct,
+        mainFile: req.body.mainFile,
+    }
+
+    Product.findOneAndUpdate({_id:req.params.id},updatedObject).then(product =>{
+        console.log(product);
+        if(product) {
+            return res.status(200).json({success: true, message: 'Użytkownik został zaktualizowany!'})
+        } else {
+            return res.status(404).json({success: false , message: "nie znaleziono użytkownika!"})
         }
     }).catch(err=>{
        return res.status(500).json({success: false, error: err}) 

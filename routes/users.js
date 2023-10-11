@@ -113,6 +113,41 @@ router.delete('/:id', (req, res)=>{
     })
 })
 
+router.put('/',async(req, res)=>{
+
+    const name=req.body.name;
+    const oldpassword=req.body.oldpassword;
+    const newpassword=req.body.newpassword;
+
+    const user = await User.findOne({name});
+
+    if(!user)
+    {
+        return res.status(404).json({success: false, error: 'Brak użytkownika.'}) ;
+    }
+
+    if(bcrypt.compareSync(oldpassword, user.password))
+    {
+        const updatedObject={
+            name: name,
+            password: bcrypt.hashSync(newpassword, 10)    
+        }
+
+        User.findOneAndUpdate({name:name},updatedObject).then(user =>{
+            if(user) {
+                return res.status(200).json({success: true, message: 'Hasło zostało zmienione!'});
+            } else {
+                return res.status(404).json({success: false , message:'Brak użytkownika.'});
+            }
+        }).catch(err=>{
+        return res.status(500).json({success: false, error: err}) 
+        })
+    }else{
+        return res.status(404).json({success: false, error: 'Błędne hasło.'}); 
+    }
+})
+
+
 
 
 module.exports =router;
